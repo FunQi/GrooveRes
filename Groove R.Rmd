@@ -1,0 +1,539 @@
+---
+title: "Groove Research Findings"
+author: "Qi Draaisma"
+date: "10-2-2021"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
+    theme: simplex
+---
+
+
+Findings Storyboard
+========================
+```{r echo=FALSE, message=FALSE, results=FALSE, warnings=FALSE}
+
+# Cleaning the Data and retrieving only the fully finished responses.
+
+library(ggplot2)
+library(gridExtra)
+library(plotly)
+library(tidyverse)
+library(dplyr)
+
+GDat <- read.csv("Groove_Data.csv")
+vars <- c("Not at all", "Not that much", "Not really", "Somewhat", "A lot", "Very much")
+
+counts <- as.data.frame(bind_rows(
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q9_1) %>% rename("Answer" = Q9_1) %>% mutate(aspect = "pb", sample = 1, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q19_1) %>% rename("Answer" = Q19_1) %>% mutate(aspect = "pb", sample = 2, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q22_1) %>% rename("Answer" = Q22_1) %>% mutate(aspect = "pb", sample = 3, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q25_1) %>% rename("Answer" = Q25_1) %>% mutate(aspect = "pb", sample = 4, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q28_1) %>% rename("Answer" = Q28_1) %>% mutate(aspect = "pb", sample = 5, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q31_1) %>% rename("Answer" = Q31_1) %>% mutate(aspect = "pb", sample = 6, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q34_1) %>% rename("Answer" = Q34_1) %>% mutate(aspect = "pb", sample = 7, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q37_1) %>% rename("Answer" = Q37_1) %>% mutate(aspect = "pb", sample = 8, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q40_1) %>% rename("Answer" = Q40_1) %>% mutate(aspect = "pb", sample = 9, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q43_1) %>% rename("Answer" = Q43_1) %>% mutate(aspect = "pb", sample = 10, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q46_1) %>% rename("Answer" = Q46_1) %>% mutate(aspect = "pb", sample = 11, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q49_1) %>% rename("Answer" = Q49_1) %>% mutate(aspect = "pb", sample = 12, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q52_1) %>% rename("Answer" = Q52_1) %>% mutate(aspect = "pb", sample = 13, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q55_1) %>% rename("Answer" = Q55_1) %>% mutate(aspect = "pb", sample = 14, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q58_1) %>% rename("Answer" = Q58_1) %>% mutate(aspect = "pb", sample = 15, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q61_1) %>% rename("Answer" = Q61_1) %>% mutate(aspect = "pb", sample = 16, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q64_1) %>% rename("Answer" = Q64_1) %>% mutate(aspect = "pb", sample = 17, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q67_1) %>% rename("Answer" = Q67_1) %>% mutate(aspect = "pb", sample = 18, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q9_2) %>% rename("Answer" = Q9_2) %>% mutate(aspect = "utm", sample = 1, duration ="long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q19_2) %>% rename("Answer" = Q19_2) %>% mutate(aspect = "utm", sample = 2, duration ="short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q22_2) %>% rename("Answer" = Q22_2) %>% mutate(aspect = "utm", sample = 3, duration ="long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q25_2) %>% rename("Answer" = Q25_2) %>% mutate(aspect = "utm", sample = 4, duration ="short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q28_2) %>% rename("Answer" = Q28_2) %>% mutate(aspect = "utm", sample = 5, duration ="long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q31_2) %>% rename("Answer" = Q31_2) %>% mutate(aspect = "utm", sample = 6, duration ="short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q34_2) %>% rename("Answer" = Q34_2) %>% mutate(aspect = "utm", sample = 7, duration ="long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q37_2) %>% rename("Answer" = Q37_2) %>% mutate(aspect = "utm", sample = 8, duration ="short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q40_2) %>% rename("Answer" = Q40_2) %>% mutate(aspect = "utm", sample = 9, duration ="long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q43_2) %>% rename("Answer" = Q43_2) %>% mutate(aspect = "utm", sample = 10, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q46_2) %>% rename("Answer" = Q46_2) %>% mutate(aspect = "utm", sample = 11, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q49_2) %>% rename("Answer" = Q49_2) %>% mutate(aspect = "utm", sample = 12, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q52_2) %>% rename("Answer" = Q52_2) %>% mutate(aspect = "utm", sample = 13, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q55_2) %>% rename("Answer" = Q55_2) %>% mutate(aspect = "utm", sample = 14, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q58_2) %>% rename("Answer" = Q58_2) %>% mutate(aspect = "utm", sample = 15, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q61_2) %>% rename("Answer" = Q61_2) %>% mutate(aspect = "utm", sample = 16, duration = "short"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q64_2) %>% rename("Answer" = Q64_2) %>% mutate(aspect = "utm", sample = 17, duration = "long"),
+  count(GDat[which(GDat$Q19_2 != "" & GDat$RecipientEmail == "" & GDat$Q46_2 != "" & GDat$Q31_2 != "" & GDat$Q58_2 != ""),], Q67_2) %>% rename("Answer" = Q67_2) %>% mutate(aspect = "utm", sample = 18, duration = "short")
+))
+
+'%notin%' <- function(x, y)!('%in%'(x,y))
+
+for (x in unique(counts$sample)){
+  for (a in unique(counts$aspect)){
+      for (var in vars) {
+        if (var %notin% unique(counts[which(counts$sample == x & counts$aspect == a), "Answer"])) {
+          d <- unique(counts[which(counts$sample == x), "duration"])
+          counts[nrow(counts) + 1,] = c(var, 0, a, x, d)
+        }
+    }
+  }
+}
+
+counts$n <- as.numeric(counts$n)
+```
+
+This Storyboard will help me with organizing my data and ultimately present it to Makiko.
+
+It will also help me organize my brain while keeping up with making nice-looking plots and data.
+
+Happy me!
+
+The Data
+=======================
+### A Roster with the full data of every sample at once
+
+```{r}
+counts %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  facet_wrap(~as.numeric(sample), ncol = 4, nrow=6)
+```
+***
+* Very unorganized
+* Helps with recognizing trends
+* A very exploratory plot :)
+
+It seems the initial hypothesis is wrong! Hooray!
+
+The second hypothesis that was created during the reviewing of the samples did seem to work out!
+
+Changes seem to be minimal!
+
+Melody 1
+========================
+
+
+
+```{r fig.width=14, fig.height=10}
+S1 <- counts %>%
+  filter(sample == 1) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect, n
+      )
+    ) +
+  geom_bar(stat="identity", position="dodge") +
+  ggtitle("Melody 1, Horns, Long") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S1b <- counts %>%
+  filter(sample == 2) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect, n
+    )) +
+  geom_bar(stat="identity", position="dodge") +
+  ggtitle("Melody 1, Horns, Short") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S2 <- counts %>%
+  filter(sample == 3) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Melody 1, Piano, Long") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S2b <- counts %>%
+  filter(sample == 3) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Melody 1, Piano, Short") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S3 <- counts %>%
+  filter(sample == 5) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect,
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Melody 1, Sitar, Long") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S3b <- counts %>%
+  filter(sample == 6) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect,
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Melody 1, Sitar, Short") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+
+grid.arrange(S1, S1b, S2, S2b, S3, S3b)
+```
+
+Melody 2
+=======================
+
+```{r fig.width=14, fig.height=10}
+S4 <- counts %>%
+  filter(sample == 7) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect, n
+      )
+    ) +
+  geom_bar(stat="identity", position="dodge") +
+  ggtitle("Melody 2, Horns, Long") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S4b <- counts %>%
+  filter(sample == 8) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect, n
+      )
+    ) +
+  geom_bar(stat="identity", position="dodge") +
+  ggtitle("Melody 2, Horns, Short") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S5 <- counts %>%
+  filter(sample == 9) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Melody 2, Piano, Long") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S5b <- counts %>%
+  filter(sample == 10) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Melody 2, Piano, Short") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S6 <- counts %>%
+  filter(sample == 11) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect,
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Melody 2, Sitar, Long") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S6b <- counts %>%
+  filter(sample == 12) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect,
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Melody 2, Sitar, Short") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+
+grid.arrange(S4, S4b, S5, S5b, S6, S6b)
+```
+
+Melody 3
+=======================
+
+```{r fig.width=14, fig.height=10}
+S7 <- counts %>%
+  filter(sample == 13) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect, n
+      )
+    ) +
+  geom_bar(stat="identity", position="dodge") +
+  ggtitle("Melody 3, Horns, Long") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S7b <- counts %>%
+  filter(sample == 14) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect, n
+      )
+    ) +
+  geom_bar(stat="identity", position="dodge") +
+  ggtitle("Melody 3, Horns, Short") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S8 <- counts %>%
+  filter(sample == 15) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Melody 3, Piano, Long") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S8b <- counts %>%
+  filter(sample == 16) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Melody 3, Piano, Short") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S9 <- counts %>%
+  filter(sample == 17) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect,
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Melody 3, Sitar, Long") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+S9b <- counts %>%
+  filter(sample == 18) %>%
+  ggplot(
+    aes(
+      x = Answer,
+      y = n,
+      fill = aspect,
+      )
+    ) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Melody 3, Sitar, Short") +
+  geom_text(
+    aes(
+      label = n
+    ),
+    position=position_dodge(0.9),
+    vjust=2
+  )
+
+
+grid.arrange(S7, S7b, S8, S8b, S9, S9b)
+```
+
+
+Differences through note length
+==================================
+
+```{r}
+diff <- data.frame(Answer=as.character(),
+                   d=as.numeric(),
+                   sample=as.numeric(),
+                   aspect=as.character(),
+                   color=as.character())
+
+
+
+for (x in 1:9){
+  for (ap in unique(counts$aspect)) {
+  for (var in vars) {
+    d <- as.numeric(counts[which(counts$sample == x & counts$Answer == var & counts$aspect == ap), "n"]) - as.numeric(counts[which(counts$sample == x + 1 & counts$Answer == var & counts$aspect == ap), "n"])
+    
+    c = ifelse(ap == "utm", "rgb(255, 0, 0)", "rgb(0, 128, 0)")
+    
+    diff[nrow(diff) + 1,] <- c(var, d, x, ap, c)
+  }
+  }
+}
+
+p1 <- plot_ly(data = diff%>%filter(sample == 1), x = ~Answer, y = ~as.numeric(d), type = "bar", color=~aspect, showlegend=F)
+p2 <- plot_ly(data = diff%>%filter(sample == 2), x = ~Answer, y = ~as.numeric(d), type = "bar", color=~aspect, showlegend=F)
+p3 <- plot_ly(data = diff%>%filter(sample == 3), x = ~Answer, y = ~as.numeric(d), type = "bar", color=~aspect, showlegend=F)
+p4 <- plot_ly(data = diff%>%filter(sample == 4), x = ~Answer, y = ~as.numeric(d), type = "bar", color=~aspect, showlegend=F)
+p5 <- plot_ly(data = diff%>%filter(sample == 5), x = ~Answer, y = ~as.numeric(d), type = "bar", color=~aspect)
+p6 <- plot_ly(data = diff%>%filter(sample == 6), x = ~Answer, y = ~as.numeric(d), type = "bar", color=~aspect, showlegend=F)
+p7 <- plot_ly(data = diff%>%filter(sample == 7), x = ~Answer, y = ~as.numeric(d), type = "bar", color=~aspect, showlegend=F)
+p8 <- plot_ly(data = diff%>%filter(sample == 8), x = ~Answer, y = ~as.numeric(d), type = "bar", color=~aspect, showlegend=F)
+p9 <- plot_ly(data = diff%>%filter(sample == 9), x = ~Answer, y = ~as.numeric(d), type = "bar", color=~aspect, showlegend=F)
+
+subplot(p1, p2, p3, p4, p5, p6, p7, p8, p9, nrows=4, shareY=T, shareX=T)
+```
+
+Differences for M1
+================
+
+```{r}
+subplot(p1, p2, p3)
+```
+
+Differences for M2
+================
+
+```{r}
+subplot(p4, p5, p6)
+```
+
+Differences for M3
+================
+
+```{r}
+subplot(p7, p8, p9)
+```
